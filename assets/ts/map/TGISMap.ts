@@ -54,7 +54,8 @@ class TGISMap {
       map: new Map({
         basemap
       }),
-      container
+      container,
+      ...mapConfig.options
     })
     view.ui.remove('attribution')
     await view.when()

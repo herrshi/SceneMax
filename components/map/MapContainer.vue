@@ -14,6 +14,7 @@
 import { Vue, Component, Provide } from 'vue-property-decorator'
 import TGISMap from '~/assets/ts/map/TGISMap'
 import MapCameraInfo from '~/components/map/widgets/MapCameraInfo.vue'
+import { mapStore } from '~/store'
 
 @Component({
   components: {
@@ -26,6 +27,10 @@ export default class MapContainer extends Vue {
   @Provide('getView') getView: Promise<
     __esri.SceneView
   > = this.getViewWhenReady()
+
+  get mapLoaded () {
+    return mapStore.mapLoaded
+  }
 
   getViewWhenReady (): Promise<__esri.SceneView> {
     return new Promise((resolve) => {
@@ -47,6 +52,7 @@ export default class MapContainer extends Vue {
     await this.mapApp.initialize(
       document.getElementById('divMap') as HTMLDivElement
     )
+    mapStore.mapLoadFinish()
     await this.mapApp.loadWidget([
       {
         container: document.getElementById('divMapCameraInfo') as HTMLElement,

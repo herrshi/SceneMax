@@ -30,6 +30,7 @@
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-nuxt": ">=0.4.2",
     "eslint-plugin-prettier": "^3.1.2",
+    "mdbvue": "git+https://oauth2:ygnd4kdbH-XQXWHyTjkN@git.mdbootstrap.com/mdb/vue/vu-pro.git",
     "prettier": "^1.19.1",
     "vue-class-component": "^7.1.0",
     "vue-property-decorator": "^8.3.0",

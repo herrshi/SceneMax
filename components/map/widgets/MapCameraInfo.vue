@@ -1,87 +1,57 @@
 <template>
-  <div>
-    <a-card
-      title="地图镜头"
-      style="height: 450px; width: 300px;"
-    >
-      <a-form :form="form">
-        <a-form-item
-          label="水平角度"
-          :label-col="formItemLayout.labelCol"
-          :wrapper-col="formItemLayout.wrapperCol"
-        >
-          <a-input v-decorator="['heading']" />
-        </a-form-item>
+  <mdb-card dark>
+    <mdb-card-body color="elegant" class="white-text">
+      <mdb-card-title>{{ widgetTitle }}</mdb-card-title>
+      <hr class="hr-light">
+      <mdb-row>
+        <mdb-col>
+          <mdb-input v-model="heading" label="Heading" @keypress.native.enter="goTo" />
+        </mdb-col>
+        <mdb-col>
+          <mdb-input v-model="tilt" label="Tilt" @keypress.native.enter="goTo" />
+        </mdb-col>
+        <mdb-col>
+          <mdb-input v-model="height" label="Height" @keypress.native.enter="goTo" />
+        </mdb-col>
+      </mdb-row>
 
-        <a-form-item
-          label="垂直角度"
-          :label-col="formItemLayout.labelCol"
-          :wrapper-col="formItemLayout.wrapperCol"
-        >
-          <a-input v-decorator="['tilt']" />
-        </a-form-item>
+      <mdb-row>
+        <mdb-col>
+          <mdb-input v-model="x" label="x" @keypress.native.enter="goTo" />
+        </mdb-col>
+        <mdb-col>
+          <mdb-input v-model="y" label="y" @keypress.native.enter="goTo" />
+        </mdb-col>
+      </mdb-row>
 
-        <a-form-item
-          label="高度"
-          :label-col="formItemLayout.labelCol"
-          :wrapper-col="formItemLayout.wrapperCol"
-        >
-          <a-input v-decorator="['height']" />
-        </a-form-item>
+      <div class="d-flex justify-content-around">
+        <mdb-btn color="mdb-color" size="sm" @click="goTo">
+          <mdb-icon far icon="paper-plane" class="mr-1" />跳转
+        </mdb-btn>
 
-        <a-form-item
-          label="经度"
-          :label-col="formItemLayout.labelCol"
-          :wrapper-col="formItemLayout.wrapperCol"
-        >
-          <a-input v-decorator="['latitude']" />
-        </a-form-item>
-
-        <a-form-item
-          label="纬度"
-          :label-col="formItemLayout.labelCol"
-          :wrapper-col="formItemLayout.wrapperCol"
-        >
-          <a-input v-decorator="['longitude']" />
-        </a-form-item>
-
-        <a-form-item>
-          <a-row type="flex" justify="space-between">
-            <a-col :span="12">
-              <a-button type="primary" @click="resetCamera">
-                还原
-              </a-button>
-            </a-col>
-
-            <a-col :span="12">
-              <a-button type="primary">
-                跳转
-              </a-button>
-            </a-col>
-          </a-row>
-        </a-form-item>
-      </a-form>
-    </a-card>
-  </div>
+        <mdb-btn color="mdb-color" size="sm" @click="resetCamera">
+          <mdb-icon icon="home" class="mr-1" />还原
+        </mdb-btn>
+      </div>
+    </mdb-card-body>
+  </mdb-card>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Inject } from 'vue-property-decorator'
+import { mapStore } from '~/store'
 
 @Component
 export default class MapCameraInfo extends Vue {
   view!: __esri.SceneView
-  form: any
-  formItemLayout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 }
-  }
+  widgetTitle: string = '地图镜头'
+  heading: number = 0
+  tilt: number = 0
+  height: number = 0
+  x: number = 0
+  y: number = 0
 
   @Inject('getView') readonly getView!: Promise<__esri.SceneView>
-
-  beforeCreate () {
-    this.form = this.$form.createForm(this)
-  }
 
   async mounted () {
     this.view = await this.getView
@@ -93,18 +63,39 @@ export default class MapCameraInfo extends Vue {
   }
 
   private showCameraParams (camera: __esri.Camera) {
-    const { heading, tilt, position } = camera
-    this.form.setFieldsValue({
-      heading: heading.toFixed(3),
-      tilt: tilt.toFixed(3),
-      height: position.z.toFixed(3),
-      latitude: position.latitude.toFixed(6),
-      longitude: position.longitude.toFixed(6)
-    })
+    this.heading = Number(camera.heading.toFixed(2))
+    this.tilt = Number(camera.tilt.toFixed(2))
+    this.x = Number(camera.position.longitude.toFixed(6))
+    this.y = Number(camera.position.latitude.toFixed(6))
+    this.height = Number(
+      camera.position.hasZ ? camera.position.z.toFixed(2) : null
+    )
   }
 
-  private resetCamera () {}
+  private resetCamera () {
+    this.view.goTo(mapStore.initialCamera)
+  }
+
+  private goTo () {
+    const camera = {
+      heading: this.heading,
+      tilt: this.tilt,
+      position: {
+        longitude: this.x,
+        latitude: this.y,
+        z: this.height
+      }
+    }
+    this.view.goTo(camera)
+  }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.card {
+  width: 350px;
+}
+.form-control {
+  color: white !important;
+}
+</style>

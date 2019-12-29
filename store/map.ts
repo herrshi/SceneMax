@@ -6,10 +6,16 @@ import { VuexModule, Module, Mutation } from 'vuex-module-decorators'
   name: 'map'
 })
 export default class MapModule extends VuexModule {
-  mapLoaded: boolean = false
+  mapLoaded = false
+  initialCamera = {}
 
   @Mutation
   mapLoadFinish() {
     this.mapLoaded = true
+  }
+
+  @Mutation
+  setInitialCamera (camera: __esri.Camera) {
+    this.initialCamera = camera
   }
 }

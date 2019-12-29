@@ -23,13 +23,17 @@ export default {
   ** Global CSS
   */
   css: [
-    'ant-design-vue/dist/antd.css'
+    // 'ant-design-vue/dist/antd.css',
+    'bootstrap-css-only/css/bootstrap.min.css',
+    'mdbvue/lib/css/mdb.min.css',
+    '@fortawesome/fontawesome-free/css/all.min.css'
   ],
   /*
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/antd-ui'
+    // '@/plugins/antd-ui',
+    '@/plugins/mdbvue'
   ],
   /*
   ** Nuxt.js dev-modules

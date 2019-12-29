@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <div id="divMapCameraInfo" class="esri-widget">
+      <div id="divMapCameraInfo">
         <map-camera-info />
       </div>
     </div>
@@ -53,6 +53,7 @@ export default class MapContainer extends Vue {
       document.getElementById('divMap') as HTMLDivElement
     )
     mapStore.mapLoadFinish()
+    mapStore.setInitialCamera(this.mapApp.view.camera)
     await this.mapApp.loadWidget([
       {
         container: document.getElementById('divMapCameraInfo') as HTMLElement,

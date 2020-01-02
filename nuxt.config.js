@@ -33,7 +33,8 @@ export default {
   */
   plugins: [
     // '@/plugins/antd-ui',
-    '@/plugins/mdbvue'
+    '@/plugins/mdbvue',
+    { src: '~/plugins/vue-echarts', ssr: false }
   ],
   /*
   ** Nuxt.js dev-modules

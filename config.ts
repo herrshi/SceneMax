@@ -17,9 +17,9 @@ export const mapConfig = {
       heading: 0,
       tilt: 0,
       position: {
-        x: 121.470462,
-        y: 31.214473,
-        z: 60000
+        x: 0,
+        y: 0,
+        z: 25000000
       }
     }
   }

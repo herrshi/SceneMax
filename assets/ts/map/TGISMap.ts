@@ -1,21 +1,25 @@
 import { loadModules, loadCss, setDefaultOptions } from 'esri-loader'
 import { mapConfig } from '~/config'
-
-export interface WidgetConfig {
-  container: HTMLElement
-  expanded?: boolean
-  position?: string
-  icon?: string
-}
+import { IWidgetConfig, IMapInitialize } from '~/assets/ts/types/map'
 
 class TGISMap {
-  view!: __esri.SceneView
+  public view!: __esri.SceneView
+  private rotateHandler!: number
 
   constructor() {}
 
-  async initialize(container: HTMLDivElement) {
+  public async initialize(params: IMapInitialize) {
     setDefaultOptions({ url: `${mapConfig.arcgis_api}/init.js` })
-    loadCss(`${mapConfig.arcgis_api}/esri/themes/dark-blue/main.css`)
+    const cssFile: string = params.theme
+      ? `themes/${params.theme}/main.css`
+      : 'css/main.css'
+    loadCss(`${mapConfig.arcgis_api}/esri/${cssFile}`)
+    // if (params.theme) {
+    //   loadCss(`${mapConfig.arcgis_api}/esri/themes/${params.theme}/main.css`)
+    // }
+    // else {
+    //   loadCss(`${mapConfig.arcgis_api}/esri/css/main.css`)
+    // }
 
     type MapModules = [
       typeof import('esri/views/SceneView'),
@@ -54,7 +58,7 @@ class TGISMap {
       map: new Map({
         basemap
       }),
-      container,
+      container: params.container,
       ...mapConfig.options
     })
     view.ui.remove('attribution')
@@ -62,7 +66,7 @@ class TGISMap {
     this.view = view
   }
 
-  async loadWidget(widgetConfigs: Array<WidgetConfig>) {
+  public async loadWidget(widgetConfigs: Array<IWidgetConfig>) {
     type MapModules = [typeof import('esri/widgets/Expand')]
     const [Expand] = await (loadModules(['esri/widgets/Expand']) as Promise<
       MapModules
@@ -71,12 +75,36 @@ class TGISMap {
       if (widgetConfig.expanded) {
         const expandWidget = new Expand({
           view: this.view,
-          content: widgetConfig.container,
+          content: widgetConfig.content,
           expandIconClass: widgetConfig.icon
         })
         this.view.ui.add(expandWidget, widgetConfig.position || 'top-right')
       }
     })
+  }
+
+  private shiftCamera(xOffset: number, yOffset: number): __esri.Camera {
+    const camera = this.view.camera.clone()
+    camera.position.longitude += xOffset
+    camera.position.latitude += yOffset
+    return camera
+  }
+
+  public startRotate(xOffset: number = 60, yOffset: number = 0, speed: number = 0.1) {
+    // 禁止鼠标事件
+    this.view.on('drag', (event) => event.stopPropagation())
+    this.view.on('double-click', (event) => event.stopPropagation())
+    this.view.on('mouse-wheel', (event) => event.stopPropagation())
+    this.view.on('click', (event) => event.stopPropagation())
+
+    this.rotateHandler = window.setInterval(() => {
+      this.view.goTo(this.shiftCamera(xOffset, yOffset), {speedFactor : speed, easing: "linear"})
+    }, 3000);
+    this.view.goTo(this.shiftCamera(xOffset, yOffset), {speedFactor : speed, easing: "linear"})
+  }
+
+  public stopRotate() {
+    window.clearInterval(this.rotateHandler)
   }
 }
 

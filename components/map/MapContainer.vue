@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div>
+    <div style="display: none">
       <div id="divMapCameraInfo">
         <map-camera-info />
       </div>
@@ -13,8 +13,8 @@
 <script lang="ts">
 import { Vue, Component, Provide } from 'vue-property-decorator'
 import TGISMap from '~/assets/ts/map/TGISMap'
-import MapCameraInfo from '~/components/map/widgets/MapCameraInfo.vue'
 import { mapStore } from '~/store'
+import MapCameraInfo from '~/components/map/widgets/MapCameraInfo.vue'
 
 @Component({
   components: {
@@ -32,7 +32,7 @@ export default class MapContainer extends Vue {
     return mapStore.mapLoaded
   }
 
-  getViewWhenReady (): Promise<__esri.SceneView> {
+  private getViewWhenReady (): Promise<__esri.SceneView> {
     return new Promise((resolve) => {
       if (this.mapApp && this.mapApp.view && this.mapApp.view.ready) {
         resolve(this.mapApp.view)
@@ -49,26 +49,27 @@ export default class MapContainer extends Vue {
 
   async mounted () {
     this.mapApp = new TGISMap()
-    await this.mapApp.initialize(
-      document.getElementById('divMap') as HTMLDivElement
-    )
+    await this.mapApp.initialize({
+      container: 'divMap',
+      theme: 'dark-blue'
+    })
     mapStore.mapLoadFinish()
     mapStore.setInitialCamera(this.mapApp.view.camera)
     await this.mapApp.loadWidget([
       {
-        container: document.getElementById('divMapCameraInfo') as HTMLElement,
+        content: document.getElementById('divMapCameraInfo') as HTMLElement,
         expanded: true,
         position: 'top-right',
         icon: 'esri-icon-navigation'
       }
     ])
+    this.mapApp.startRotate(60)
   }
 }
 </script>
 
 <style scoped>
-#divMap,
-#divMapContainer {
+#divMap {
   padding: 0;
   margin: 0;
   width: 100vw;

@@ -1,26 +1,19 @@
 <template>
-  <div class="container">
-    <map-container />
+  <div class="app">
+    <welcome-page />
   </div>
 </template>
 
-<script>
-import MapContainer from '~/components/map/MapContainer'
+<script lang="ts">
+import { Vue, Component } from 'vue-property-decorator'
+import WelcomePage from '~/components/TheWelcomePage.vue'
 
-export default {
+@Component({
   components: {
-    MapContainer
+    WelcomePage
   }
-}
+})
+export default class App extends Vue {}
 </script>
 
-<style scoped>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-</style>
+<style scoped></style>

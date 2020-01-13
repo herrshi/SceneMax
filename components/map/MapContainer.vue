@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="position: absolute; left: 0; top: 0">
     <div style="display: none">
       <div id="divMapCameraInfo">
         <map-camera-info />
@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Provide } from 'vue-property-decorator'
+import { Vue, Component, Provide, Emit } from 'vue-property-decorator'
 import TGISMap from '~/assets/ts/map/TGISMap'
 import { mapStore } from '~/store'
 import MapCameraInfo from '~/components/map/widgets/MapCameraInfo.vue'
@@ -47,6 +47,7 @@ export default class MapContainer extends Vue {
     })
   }
 
+  @Emit('mapLoaded')
   async mounted () {
     this.mapApp = new TGISMap()
     await this.mapApp.initialize({
@@ -59,11 +60,22 @@ export default class MapContainer extends Vue {
       {
         content: document.getElementById('divMapCameraInfo') as HTMLElement,
         expanded: true,
-        position: 'top-right',
+        position: 'bottom-left',
         icon: 'esri-icon-navigation'
       }
     ])
-    this.mapApp.startRotate(60)
+  }
+
+  public startRotate () {
+    this.mapApp.startRotate()
+  }
+
+  public stopRotate () {
+    this.mapApp.stopRotate()
+  }
+
+  public async goToBookmark (name: string) {
+    await this.mapApp.goToBookmark(name)
   }
 }
 </script>

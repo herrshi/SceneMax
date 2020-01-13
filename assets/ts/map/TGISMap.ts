@@ -1,25 +1,48 @@
 import { loadModules, loadCss, setDefaultOptions } from 'esri-loader'
 import { mapConfig } from '~/config'
-import { IWidgetConfig, IMapInitialize } from '~/assets/ts/types/map'
+import { IWidgetConfig, IMapInitialize, IBookmark } from '~/assets/ts/types/map'
 
 class TGISMap {
   public view!: __esri.SceneView
   private rotateHandler!: number
+  private bookmarks: Array<IBookmark> = []
 
-  constructor() {}
+  /**
+   * 移动地图镜头
+   * @param xOffset 经度偏移量
+   * @param yOffset 纬度偏移量
+   */
+  private shiftCamera (xOffset: number, yOffset: number): __esri.Camera {
+    const camera = this.view.camera.clone()
+    camera.position.longitude += xOffset
+    camera.position.latitude += yOffset
+    return camera
+  }
 
-  public async initialize(params: IMapInitialize) {
+  /**
+   * 禁止鼠标事件
+   */
+  private disableMouseEvent () {
+    this.view.on('drag', event => event.stopPropagation())
+    this.view.on('double-click', event => event.stopPropagation())
+    this.view.on('mouse-wheel', event => event.stopPropagation())
+    this.view.on('click', event => event.stopPropagation())
+    this.view.on('immediate-click', event => event.stopPropagation())
+  }
+
+  /**
+   * 初始化地图
+   * @param params
+   */
+  public async initialize (params: IMapInitialize) {
     setDefaultOptions({ url: `${mapConfig.arcgis_api}/init.js` })
+
     const cssFile: string = params.theme
       ? `themes/${params.theme}/main.css`
       : 'css/main.css'
     loadCss(`${mapConfig.arcgis_api}/esri/${cssFile}`)
-    // if (params.theme) {
-    //   loadCss(`${mapConfig.arcgis_api}/esri/themes/${params.theme}/main.css`)
-    // }
-    // else {
-    //   loadCss(`${mapConfig.arcgis_api}/esri/css/main.css`)
-    // }
+
+    this.bookmarks = mapConfig.bookmarks
 
     type MapModules = [
       typeof import('esri/views/SceneView'),
@@ -66,7 +89,7 @@ class TGISMap {
     this.view = view
   }
 
-  public async loadWidget(widgetConfigs: Array<IWidgetConfig>) {
+  public async loadWidget (widgetConfigs: Array<IWidgetConfig>) {
     type MapModules = [typeof import('esri/widgets/Expand')]
     const [Expand] = await (loadModules(['esri/widgets/Expand']) as Promise<
       MapModules
@@ -83,28 +106,55 @@ class TGISMap {
     })
   }
 
-  private shiftCamera(xOffset: number, yOffset: number): __esri.Camera {
-    const camera = this.view.camera.clone()
-    camera.position.longitude += xOffset
-    camera.position.latitude += yOffset
-    return camera
-  }
+  /**
+   * 启动地球旋转动画
+   * @param speed 动画速度倍数
+   */
+  public startRotate (speed: number = 0.1) {
+    // this.disableMouseEvent()
+    this.view.ui.empty('top-left')
 
-  public startRotate(xOffset: number = 60, yOffset: number = 0, speed: number = 0.1) {
-    // 禁止鼠标事件
-    this.view.on('drag', (event) => event.stopPropagation())
-    this.view.on('double-click', (event) => event.stopPropagation())
-    this.view.on('mouse-wheel', (event) => event.stopPropagation())
-    this.view.on('click', (event) => event.stopPropagation())
-
+    const xOffset: number = 30
+    const yOffset: number = 0
     this.rotateHandler = window.setInterval(() => {
-      this.view.goTo(this.shiftCamera(xOffset, yOffset), {speedFactor : speed, easing: "linear"})
-    }, 3000);
-    this.view.goTo(this.shiftCamera(xOffset, yOffset), {speedFactor : speed, easing: "linear"})
+      this.view.goTo(this.shiftCamera(xOffset, yOffset), {
+        speedFactor: speed,
+        easing: 'linear'
+      })
+    }, 5000)
+    this.view.goTo(this.shiftCamera(xOffset, yOffset), {
+      speedFactor: speed,
+      easing: 'linear'
+    })
   }
 
-  public stopRotate() {
+  /**
+   * 停止地球旋转动画
+   */
+  public stopRotate () {
     window.clearInterval(this.rotateHandler)
+  }
+
+  /**
+   * 显示人口图层
+   */
+  public showPopulationLayer () {}
+
+  /**
+   * 隐藏人口图层
+   */
+  public hidePopulationLayer () {}
+
+  /**
+   * 跳转书签位置
+   * @param name 书签名称
+   * @returns Promise
+   */
+  public goToBookmark (name: string) {
+    const bookmark = this.bookmarks.find((bookmark) => bookmark.name === name)
+    if (bookmark) {
+      return this.view.goTo(bookmark.camera, { speedFactor: 0.2 })
+    }
   }
 }
 

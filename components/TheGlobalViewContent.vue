@@ -1,6 +1,6 @@
 <template>
-  <div style="position: absolute; width: 400px; right: 20px; top: 100px">
-    <div id="part1" style="opacity: 0">
+  <div style="position: absolute; width: 400px; right: 20px; top: 50px">
+    <div id="globalPart1" class="initPart">
       <h2 class="white-text font-weight-bold">
         Global View
       </h2>
@@ -10,10 +10,10 @@
         veniam.
       </p>
     </div>
-    <div id="part2" class="mt-5" style="opacity: 0">
+    <div id="globalPart2" class="initPart">
       <mdb-row>
         <mdb-col>
-          <h4 class="white-text">
+          <h4 class="white-text font-weight-bold">
             场景
           </h4>
           <h4
@@ -25,7 +25,7 @@
           </h4>
         </mdb-col>
         <mdb-col>
-          <h4 class="white-text">
+          <h4 class="white-text font-weight-bold">
             覆盖率
           </h4>
           <h4
@@ -39,7 +39,32 @@
       </mdb-row>
     </div>
 
-    <div id="part3" style="opacity: 0; height: 300px" />
+    <div id="globalPart3" class="initPart">
+      <mdb-row>
+        <mdb-col>
+          <mdb-row
+            v-for="(data, index) in chartData"
+            :key="index"
+            style="margin-top: 12px"
+          >
+            <mdb-col>
+              <h6 class="white-text font-weight-bold">
+                {{ index + 1 }}. {{ data.sceneName }}
+              </h6>
+            </mdb-col>
+            <mdb-col>
+              <h6 class="white-text text-right font-weight-bold">
+                {{ data.count }}
+              </h6>
+            </mdb-col>
+          </mdb-row>
+        </mdb-col>
+
+        <mdb-col>
+          <div id="globalChartDiv" style="height: 200px" />
+        </mdb-col>
+      </mdb-row>
+    </div>
   </div>
 </template>
 
@@ -56,54 +81,71 @@ export default class GlobalViewContent extends Vue {
     coverage: '0%'
   }
 
-  private chartData = [
-    { sceneName: '场景1', count: 220 },
-    { sceneName: '场景2', count: 182 },
-    { sceneName: '场景3', count: 191 },
-    { sceneName: '场景4', count: 234 },
-    { sceneName: '场景5', count: 290 }
-  ]
+  private chartData: Array<any> = []
+
+  mounted () {
+    const sourceData = [
+      { sceneName: '违停驱离', count: 220 },
+      { sceneName: '信控专家', count: 182 },
+      { sceneName: '场景', count: 191 },
+      { sceneName: '场景', count: 234 },
+      { sceneName: '场景', count: 290 }
+    ]
+    this.chartData = sourceData.sort((a, b) => b.count - a.count)
+  }
 
   private initChartData () {
-    this.chartData.sort((a, b) => a.count - b.count)
-    const chart = echarts.init($('#part3')[0] as HTMLDivElement)
+    const chart = echarts.init($('#globalChartDiv')[0] as HTMLDivElement)
     const yData = this.chartData.map(
-      (data, index) => index + 1 + '. ' + data.sceneName + '  ' + data.count
+      data => data.sceneName + '  ' + data.count
     )
     chart.setOption({
       grid: {
-        containLabel: true,
         left: 5,
-        right: 0
+        right: 0,
+        top: 0,
+        bottom: 0
       },
       xAxis: {
         show: false
       },
       yAxis: {
         data: yData,
-        axisLine: {
-          show: false
-        },
-        axisTick: {
-          show: false
-        },
-        axisLabel: {
-          color: 'white',
-          fontSize: 18,
-          fontFamily: 'Microsoft YaHei'
-        }
+        show: false
       },
       series: [
         {
           type: 'bar',
-          data: this.chartData.map(data => data.count),
+          data: this.chartData.map(data => data.count).reverse(),
           barWidth: 5,
           itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-              { offset: 0, color: 'rgb(166, 132, 255)' },
-              { offset: 0.5, color: 'rgb(246, 66, 255)' },
-              { offset: 1, color: 'rgb(245, 1, 255)' }
-            ]) as any
+            barBorderRadius: [0, 5, 5, 0],
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 1,
+              y2: 0,
+              colorStops: [
+                {
+                  offset: 0,
+                  color: 'rgb(166, 132, 255)'
+                },
+                {
+                  offset: 0.5,
+                  color: 'rgb(246, 66, 255)'
+                },
+                {
+                  offset: 1,
+                  color: 'rgb(245, 1, 255)'
+                }
+              ]
+            } as any
+            // color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            //   { offset: 0, color: 'rgb(166, 132, 255)' },
+            //   { offset: 0.5, color: 'rgb(246, 66, 255)' },
+            //   { offset: 1, color: 'rgb(245, 1, 255)' }
+            // ]) as any
           },
           animationDelay: (index: number) => index * 100
         }
@@ -112,22 +154,22 @@ export default class GlobalViewContent extends Vue {
     })
   }
 
-  async mounted () {
+  public async showContent () {
     const animeTimeLine = anime.timeline({
       duration: 2000
     })
     await animeTimeLine
       .add({
-        targets: '#part1',
+        targets: '#globalPart1',
         opacity: 1,
         delay: 2000
       })
       .add(
         {
-          targets: '#part2',
-          opacity: 1
-        },
-        '-=500'
+          targets: '#globalPart2',
+          opacity: 1,
+          translateY: 150
+        }
       )
       .add(
         {
@@ -140,16 +182,57 @@ export default class GlobalViewContent extends Vue {
             $('#sceneCountText')[0].innerHTML = this.par2Data.sceneCount
             $('#coverageText')[0].innerHTML = this.par2Data.coverage
           }
-        },
-        '-=500'
+        }
       )
-      .add({
-        targets: '#part3',
-        opacity: 1
-      }).finished
+      .add(
+        {
+          targets: '#globalPart3',
+          opacity: 1,
+          translateY: 250
+        }
+      ).finished
     this.initChartData()
+  }
+
+  public async hideContent () {
+    const animeTimeLine = anime.timeline({
+      duration: 2000
+    })
+    await animeTimeLine
+      .add({
+        targets: '#globalPart1',
+        opacity: 0,
+        translateY: 10
+      })
+      .add(
+        {
+          targets: '#globalPart2',
+          opacity: 0,
+          translateY: 10
+        },
+        '-=1800'
+      )
+      .add(
+        {
+          targets: '#globalPart3',
+          opacity: 0,
+          translateY: 10
+        },
+        '-=1800'
+      ).finished
   }
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.initPart {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+}
+div .col {
+  padding-right: 0
+}
+</style>

@@ -1,7 +1,17 @@
+export interface ICamera {
+  heading: number
+  tilt: number
+  position: {
+    x: number
+    y: number
+    z: number
+  }
+}
+
 export interface IMapInitialize {
   container: string
   theme?: string
-  camera?: __esri.Camera
+  camera?: ICamera
 }
 
 export interface IWidgetConfig {
@@ -9,4 +19,9 @@ export interface IWidgetConfig {
   expanded?: boolean
   position?: string
   icon?: string
+}
+
+export interface IBookmark {
+  name: string,
+  camera: ICamera
 }

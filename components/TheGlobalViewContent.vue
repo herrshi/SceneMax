@@ -54,7 +54,7 @@
             </mdb-col>
             <mdb-col>
               <h6 class="white-text text-right font-weight-bold">
-                {{ data.count }}
+                {{ data.count.toLocaleString('en-US') }}
               </h6>
             </mdb-col>
           </mdb-row>

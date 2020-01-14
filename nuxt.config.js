@@ -16,9 +16,9 @@ export default {
     ],
     script: [
       { src: 'http://api.map.baidu.com/api?v=1.0&type=webgl&ak=Mdr8jB433LaiDOzecIrhtGm5MztSmweR' },
-      { src: 'http://mapv.baidu.com/build/mapv.min.js' },
-      { src: 'https://code.bdstatic.com/npm/mapvgl@1.0.0-beta.24/dist/mapvgl.min.js' },
-      { src: 'https://mapv.baidu.com/gl/examples/static/common.js' }
+      { src: '/lib/mapv.min.js' },
+      { src: '/lib/mapvgl.min.js' },
+      { src: '/lib/common.js' }
     ]
   },
   /*
